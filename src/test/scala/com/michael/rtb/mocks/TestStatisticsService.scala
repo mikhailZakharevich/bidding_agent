@@ -6,7 +6,7 @@ import monix.eval.Task
 
 class TestStatisticsService extends StatisticsService {
 
-  override def getSites: Task[List[Site]] = Task.pure(List())
+  override def getSites: Task[List[Site]] = Task.pure(List(Site(1, "https://random.com/1")))
 
   override def getSiteById(siteId: Int): Task[Int] = Task.pure(1)
 

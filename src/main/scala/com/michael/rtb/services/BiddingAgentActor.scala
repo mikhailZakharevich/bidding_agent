@@ -31,7 +31,6 @@ class BiddingAgentActor(statisticsService: StatisticsService, campaignsStorage: 
         case BidRequestCommand(br, replyTo) =>
           val tags = br.imp.getOrElse(Nil).map(_.tagId)
 
-//          val tags = List("tag1", "tag2")
           (for {
             site <- statisticsService.getOrInsert(br.site, tags)
             _ = logger.debug(s"agent -> site found [${site.id}]")

@@ -40,11 +40,8 @@ class StatisticsDao(db: Database) extends LazyLogging {
   def save(site: Site, tags: List[String]): DbTask[Int] = db.runT { implicit ctx =>
     for {
       id     <- insertSite(site)
-      _      = logger.debug(s"created site with id [$id]")
       plcIds <- insertPlacements(id, tags)
-      _      = logger.debug(s"inserted placements with ids [${plcIds.mkString(",")}]")
       _      <- insertSegments(id, plcIds)
-      _      = logger.debug("inserted segments")
     } yield id
 
   }

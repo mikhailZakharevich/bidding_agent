@@ -12,10 +12,10 @@ import com.michael.rtb.routes.BiddingAgentRoutes
 import com.michael.rtb.services.{BidRequest, BidResponse}
 import com.typesafe.scalalogging.LazyLogging
 import de.heikoseeberger.akkahttpcirce._
-import io.circe.generic.auto._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import io.circe.generic.auto._
 
 class BiddingAgentRoutesSpec extends AnyWordSpec
   with Matchers
@@ -34,10 +34,6 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem
 
-  // Here we need to implement all the abstract members of UserRoutes.
-  // We use the real UserRegistryActor to test it while we hit the Routes,
-  // but we could "mock" it by implementing it in-place or by using a TestProbe
-  // created with testKit.createTestProbe()
   val agent = testKit.spawn(biddingAgent.start)
   lazy val routes = new BiddingAgentRoutes(agent).agentRoutes
 
@@ -94,7 +90,6 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
     }
 
     "be able to create bids with impressions and at least user or device data present (POST /bid-request)" in {
-      import io.circe.generic.auto._
 
       val domain = "https://random.com/1"
 
@@ -131,9 +126,9 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
     }
 
     "be able to fetch all campaigns" in {
-      import io.circe.generic.auto._
 
-      val campaign = Campaign(1, "USA", Targeting(Set(), Set()), List(Banner(1, "https://random.com/1", 1, 1)), 1.0)
+      val domain = "https://random.com/1"
+      val campaign = Campaign(1, "USA", Targeting(Set(), Set()), List(Banner(1, domain, 1, 1)), 1.0)
 
       val request = Get("/api/v1/campaigns")
 
@@ -143,6 +138,22 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
         contentType should ===(ContentTypes.`application/json`)
 
         entityAs[List[Campaign]] should contain(campaign)
+      }
+    }
+
+    "be able to fetch all sites" in {
+
+      val domain = "https://random.com/1"
+      val sites = Site(1, domain)
+
+      val request = Get("/api/v1/sites")
+
+      request ~> routes ~> check {
+        status should ===(StatusCodes.OK)
+
+        contentType should ===(ContentTypes.`application/json`)
+
+        entityAs[List[Site]] should contain(sites)
       }
     }
   }
