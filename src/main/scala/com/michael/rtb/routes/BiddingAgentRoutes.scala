@@ -59,7 +59,7 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
     val createBidRequestEndpoint: ServerEndpoint[BidRequest, ErrorResponse, BiddingAgentResponse, Any, Future] =
       endpoint
         .post
-        .in("api" / "v1" / "bid-request")
+        .in("api" / "bid-request")
         .in(jsonBody[BidRequest])
         .errorOut(jsonBody[ErrorResponse])
         .out(oneOf[BiddingAgentResponse](
@@ -71,7 +71,7 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
     val campaignsListEndpoint: ServerEndpoint[Unit, ErrorResponse, List[Campaign], Any, Future] =
       endpoint
         .get
-        .in("api" / "v1" / "campaigns")
+        .in("api" / "campaigns")
         .errorOut(jsonBody[ErrorResponse])
         .out(jsonBody[List[Campaign]])
         .serverLogic(_ => getCampaigns)
@@ -79,7 +79,7 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
     val sitesListEndpoint: ServerEndpoint[Unit, ErrorResponse, List[Site], Any, Future] =
       endpoint
         .get
-        .in("api" / "v1" / "sites")
+        .in("api" / "sites")
         .errorOut(jsonBody[ErrorResponse])
         .out(jsonBody[List[Site]])
         .serverLogic(_ => getSites)
