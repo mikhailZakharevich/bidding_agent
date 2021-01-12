@@ -10,9 +10,6 @@ class DefaultStatisticsService(statisticsDao: StatisticsDao) extends StatisticsS
 
   override def getSites: Task[List[Site]] = statisticsDao.getSites
 
-  override def getSiteById(siteId: Int): Task[Int] =
-    statisticsDao.getSiteById(siteId).map(_.id)
-
   override def getSegmentIdsBySiteId(siteId: Int): Task[List[Int]] =
     statisticsDao.getSegmentIdsBySiteId(siteId)
 

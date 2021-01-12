@@ -4,14 +4,17 @@ import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
+import com.michael.rtb.actors.BiddingAgentActor._
+import com.michael.rtb.actors._
 import com.michael.rtb.domain.{Campaign, Site}
-import com.michael.rtb.services.{BidRequest, BidResponse, BiddingAgentActor, BiddingAgentResponse, EmptyResponse}
-import com.michael.rtb.services.BiddingAgentActor.{BidRequestCommand, GetCampaignsCommand, GetSitesCommand}
+import com.michael.rtb.repository.CampaignsRepository
+import com.michael.rtb.services.StatisticsService
+import com.michael.rtb.utils.AppUtils._
 import com.typesafe.scalalogging.LazyLogging
+import io.circe.generic.auto._
 import sttp.model.StatusCode
 import sttp.tapir._
 import sttp.tapir.generic.auto._
-import io.circe.generic.auto._
 import sttp.tapir.json.circe._
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
@@ -21,7 +24,10 @@ import scala.util.control.NonFatal
 
 case class ErrorResponse(message: String)
 
-class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command])(implicit val system: ActorSystem[_]) extends LazyLogging {
+class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
+                         statisticsService: StatisticsService,
+                         campaignsProvider: CampaignsRepository)
+                        (implicit val system: ActorSystem[_]) extends LazyLogging {
 
   import Endpoints._
   private implicit val ex = system.executionContext
@@ -30,21 +36,20 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command])
     Timeout.create(system.settings.config.getDuration("app.routes.ask-timeout"))
 
   def getSites: Future[Either[ErrorResponse, List[Site]]] =
-    biddingAgentActor.ask(GetSitesCommand).map(c => Right(c.items)).recover {
+    statisticsService.getSites.map(Right(_)).toFuture.recover {
       case NonFatal(e) =>
         logger.error(s"failed to fetch sites: [${e.getMessage}]", e)
         Left(ErrorResponse(e.getMessage))
     }
 
   def getCampaigns: Future[Either[ErrorResponse, List[Campaign]]] =
-    biddingAgentActor.ask(GetCampaignsCommand).map(c => Right(c.items)).recover {
-      case NonFatal(e) =>
-        logger.error(s"failed to fetch campaigns: [${e.getMessage}]", e)
-        Left(ErrorResponse(e.getMessage))
-    }
+    Future.successful(campaignsProvider.getCampaigns).map(Right(_))
 
   def createBidRequest(bidRequest: BidRequest): Future[Either[ErrorResponse, BiddingAgentResponse]] =
-    biddingAgentActor.ask(BidRequestCommand(bidRequest, _)).map(resp => Right(resp)).recover {
+    biddingAgentActor.ask(BiddingAgentRequest(bidRequest, _)).map {
+      case BidErrorResponse(msg) => Left(ErrorResponse(msg))
+      case response => Right(response)
+    }.recover {
       case NonFatal(e) =>
         logger.error(s"failed to create bid request: [${e.getMessage}]", e)
         Left(ErrorResponse(e.getMessage))
@@ -59,7 +64,7 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command])
         .errorOut(jsonBody[ErrorResponse])
         .out(oneOf[BiddingAgentResponse](
           statusMapping(StatusCode.Created, jsonBody[BidResponse]),
-          statusMapping(StatusCode.NoContent, emptyOutput.map(_ => EmptyResponse)(_ => ()))
+          statusMapping(StatusCode.NoContent, emptyOutput.map(_ => BidEmptyResponse)(_ => ()))
         ))
         .serverLogic(createBidRequest)
 
@@ -83,6 +88,8 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command])
 
   def agentRoutes: Route = {
 
+    case class LogEntry(msg: String)
+
     import akka.http.scaladsl.server.Directives._
 
     concat(
@@ -90,7 +97,6 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command])
       AkkaHttpServerInterpreter.toRoute(campaignsListEndpoint),
       AkkaHttpServerInterpreter.toRoute(sitesListEndpoint)
     )
-
   }
 
 }

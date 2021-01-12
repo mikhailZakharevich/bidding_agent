@@ -21,14 +21,14 @@ class DefaultValidationService extends ValidationService with LazyLogging {
   override def validateSite(campaign: Campaign, site: Site): Boolean =
     campaign.targeting.targetedSiteIds.isEmpty || campaign.targeting.targetedSiteIds.contains(site.id)
 
-  override def filterBanners(campaign: Campaign, impressions: List[Impression]): List[Banner] =
+  override def validateBanners(campaign: Campaign, impressions: List[Impression]): Boolean =
     impressions.flatMap {
       case Impression(_, _, _, Some(w), _, _, Some(h), _, _)                         => campaign.banners.filter(banner => banner.height == h && banner.width == w)
       case Impression(_, Some(wmin), Some(wmax), _, Some(hmin), Some(hmax), _, _, _) => campaign.banners.filter(banner => banner.height <= hmax && banner.width <= wmax && banner.height >= hmin && banner.width >= wmin)
       case Impression(_, Some(wmin), _, _, Some(hmin), _, _, _, _)                   => campaign.banners.filter(banner => banner.height >= hmin && banner.width >= wmin)
       case Impression(_, _, Some(wmax), _, _, Some(hmax), _, _, _)                   => campaign.banners.filter(banner => banner.height <= hmax && banner.width <= wmax)
       case _                                                                         => Nil
-    }
+    }.nonEmpty
 
   private def getUserCountry(user: Option[User]): Option[String] = for {
     u       <- user

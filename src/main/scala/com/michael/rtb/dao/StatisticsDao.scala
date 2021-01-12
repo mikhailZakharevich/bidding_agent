@@ -1,13 +1,14 @@
 package com.michael.rtb.dao
 
-import com.michael.rtb.dao.Database.DbTask
+import com.michael.rtb.database.DatabaseProvider.DbTask
 import com.michael.rtb.dao.StatisticsDao._
+import com.michael.rtb.database.MysqlDatabaseProvider
 import com.michael.rtb.domain.Site
 import com.michael.rtb.errors.ApiError._
 import com.typesafe.scalalogging.LazyLogging
 import monix.eval.Task
 
-class StatisticsDao(db: Database) extends LazyLogging {
+class StatisticsDao(db: MysqlDatabaseProvider) extends LazyLogging {
 
   def getSites: DbTask[List[Site]] = db.runT { implicit ctx =>
     import ctx._

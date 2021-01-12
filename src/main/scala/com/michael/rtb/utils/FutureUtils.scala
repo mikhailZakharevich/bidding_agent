@@ -1,14 +1,10 @@
-package com.michael.rtb
+package com.michael.rtb.utils
 
-import java.util.UUID
-
-import com.michael.rtb.dao.Database.DbTask
+import com.michael.rtb.database.DatabaseProvider.DbTask
 
 import scala.concurrent.Future
 
-object Utils {
-
-  def uuid: String = UUID.randomUUID().toString.replaceAll("-", "")
+trait FutureUtils {
 
   implicit class DbTaskToFuture[A](task: DbTask[A]) {
 

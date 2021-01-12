@@ -1,16 +1,19 @@
 package com.michael.rtb.services
 
-import com.michael.rtb.domain.{Banner, Campaign, Device, Geo, Impression, Site, Targeting, User}
-import com.michael.rtb.modules.TestApplicationModule
+import com.michael.rtb.domain._
+import com.michael.rtb.services.impl.DefaultValidationService
+import com.michael.rtb.utils.AppUtils._
+import com.softwaremill.macwire.wire
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import com.michael.rtb.Utils._
 
-class ValidationServiceSpec extends AnyWordSpec with Matchers with TestApplicationModule {
+class DefaultValidationServiceSpec extends AnyWordSpec with Matchers {
+
+  val validationService: DefaultValidationService = wire[DefaultValidationService]
 
   "DefaultValidationService" should {
 
-    "filter banners by size" in {
+    "validate that banners are present" in {
 
       val validImp = Impression(
         id = uuid,
@@ -38,10 +41,9 @@ class ValidationServiceSpec extends AnyWordSpec with Matchers with TestApplicati
 
       val impressions = List(validImp, invalidImp)
 
-      val result: List[Banner] = validationService.filterBanners(campaign, impressions)
+      val result = validationService.validateBanners(campaign, impressions)
 
-      result.nonEmpty should be(true)
-      result.size should be(1)
+      result should be(true)
 
     }
 
@@ -91,7 +93,9 @@ class ValidationServiceSpec extends AnyWordSpec with Matchers with TestApplicati
 
       val campaign = Campaign(1, "USA", Targeting(Set(), Set()), List(Banner(1, "https://random.com/1", 1, 1)), 1.0)
 
-      validationService.validateSite(campaign, Site(1, "https://random.com/1"))
+      val result = validationService.validateSite(campaign, Site(1, "https://random.com/1"))
+
+      result should be(true)
 
     }
 
@@ -99,7 +103,9 @@ class ValidationServiceSpec extends AnyWordSpec with Matchers with TestApplicati
 
       val campaign = Campaign(1, "USA", Targeting(Set(1), Set()), List(Banner(1, "https://random.com/1", 1, 1)), 1.0)
 
-      validationService.validateSite(campaign, Site(1, "https://random.com/1"))
+      val result = validationService.validateSite(campaign, Site(1, "https://random.com/1"))
+
+      result should be(true)
 
     }
 
@@ -107,7 +113,9 @@ class ValidationServiceSpec extends AnyWordSpec with Matchers with TestApplicati
 
       val campaign = Campaign(1, "USA", Targeting(Set(), Set(1)), List(Banner(1, "https://random.com/1", 1, 1)), 1.0)
 
-      validationService.validateSegments(campaign, Set(1, 2))
+      val result = validationService.validateSegments(campaign, Set(1, 2))
+
+      result should be(true)
 
     }
 

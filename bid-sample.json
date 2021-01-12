@@ -1,0 +1,27 @@
+{
+  "id": "bbbbbbb",
+  "imp": [
+    {
+      "id": "nnnnnnn",
+      "w": 160,
+      "h": 600,
+      "tagId": "mmmmmmmm"
+    }
+  ],
+  "site": {
+    "id": 1,
+    "domain": "https://example.com/714"
+  },
+  "user": {
+    "id": "aaaaaa",
+    "geo": {
+      "country": "USA"
+    }
+  },
+  "device": {
+    "id": "cccccc",
+    "geo": {
+      "country": "Germany"
+    }
+  }
+}

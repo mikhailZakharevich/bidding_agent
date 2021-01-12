@@ -7,7 +7,7 @@ class DefaultAuctionService extends AuctionService {
 
   val WinningCoefficient: Price = 0.7
 
-  override def start(campaigns: List[Campaign]): Option[(Campaign, Price)] =
+  override def startAuction(campaigns: List[Campaign]): Option[(Campaign, Price)] =
     campaigns.sortWith(_.bid > _.bid).headOption.map(c => (c, c.bid * WinningCoefficient))
 
 }

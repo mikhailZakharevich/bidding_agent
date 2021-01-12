@@ -6,7 +6,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import com.michael.rtb.modules.ApplicationModule
 import com.michael.rtb.routes.BiddingAgentRoutes
-import com.michael.rtb.services.BiddingAgentActor.Command
+import com.michael.rtb.actors.BiddingAgentActor.Command
 import com.typesafe.config.{Config, ConfigFactory}
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
@@ -35,8 +35,6 @@ object ApplicationMain extends ApplicationModule {
         system.terminate()
     }
 
-
-
   }
 
   def main(args: Array[String]): Unit = {
@@ -46,7 +44,7 @@ object ApplicationMain extends ApplicationModule {
       val biddingAgentActor: ActorRef[Command] = context.spawn(biddingAgent.start, "BiddingAgentActor")
       context.watch(biddingAgentActor)
 
-      val routes = new BiddingAgentRoutes(biddingAgentActor)(context.system)
+      val routes = new BiddingAgentRoutes(biddingAgentActor, statisticsService, campaignsProvider)(context.system)
       startHttpServer(routes.agentRoutes)(context.system)
 
       Behaviors.empty

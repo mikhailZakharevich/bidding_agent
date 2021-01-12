@@ -1,8 +1,9 @@
-package com.michael.rtb.dao
+package com.michael.rtb.repository.impl
 
 import com.michael.rtb.domain.{Banner, Campaign, Targeting}
+import com.michael.rtb.repository.CampaignsRepository
 
-class CampaignsDao extends CampaignsStorage {
+class DefaultCampaignsRepository extends CampaignsRepository {
 
   override def getCampaigns = List(
     Campaign(1,  "USA", Targeting(Set(1, 2, 3), Set(1, 2)), List(Banner(671, "https://example.com/671", 320, 240), Banner(871, "https://example.com/671", 640, 480)), 20),

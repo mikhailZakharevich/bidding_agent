@@ -6,6 +6,6 @@ trait AuctionService {
 
   type Price = Double
 
-  def start(campaigns: List[Campaign]): Option[(Campaign, Price)]
+  def startAuction(campaigns: List[Campaign]): Option[(Campaign, Price)]
 
 }
