@@ -88,8 +88,6 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
 
   def agentRoutes: Route = {
 
-    case class LogEntry(msg: String)
-
     import akka.http.scaladsl.server.Directives._
 
     concat(
