@@ -29,7 +29,6 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
                          campaignsProvider: CampaignsRepository)
                         (implicit val system: ActorSystem[_]) extends LazyLogging {
 
-  import Endpoints._
   private implicit val ex = system.executionContext
 
   private implicit val timeout: Timeout =
@@ -55,38 +54,35 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
         Left(ErrorResponse(e.getMessage))
     }
 
-  private object Endpoints {
-    val createBidRequestEndpoint: ServerEndpoint[BidRequest, ErrorResponse, BiddingAgentResponse, Any, Future] =
-      endpoint
-        .post
-        .in("api" / "bid-request")
-        .in(jsonBody[BidRequest])
-        .errorOut(jsonBody[ErrorResponse])
-        .out(oneOf[BiddingAgentResponse](
-          statusMapping(StatusCode.Created, jsonBody[BidResponse]),
-          statusMapping(StatusCode.NoContent, emptyOutput.map(_ => BidEmptyResponse)(_ => ()))
-        ))
-        .serverLogic(createBidRequest)
+  private[routes] val createBidRequestEndpoint: ServerEndpoint[BidRequest, ErrorResponse, BiddingAgentResponse, Any, Future] =
+    endpoint
+      .post
+      .in("api" / "bid-request")
+      .in(jsonBody[BidRequest])
+      .errorOut(jsonBody[ErrorResponse])
+      .out(oneOf[BiddingAgentResponse](
+        statusMapping(StatusCode.Created, jsonBody[BidResponse]),
+        statusMapping(StatusCode.NoContent, emptyOutput.map(_ => BidEmptyResponse)(_ => ()))
+      ))
+      .serverLogic(createBidRequest)
 
-    val campaignsListEndpoint: ServerEndpoint[Unit, ErrorResponse, List[Campaign], Any, Future] =
-      endpoint
-        .get
-        .in("api" / "campaigns")
-        .errorOut(jsonBody[ErrorResponse])
-        .out(jsonBody[List[Campaign]])
-        .serverLogic(_ => getCampaigns)
+  private[routes] val campaignsListEndpoint: ServerEndpoint[Unit, ErrorResponse, List[Campaign], Any, Future] =
+    endpoint
+      .get
+      .in("api" / "campaigns")
+      .errorOut(jsonBody[ErrorResponse])
+      .out(jsonBody[List[Campaign]])
+      .serverLogic(_ => getCampaigns)
 
-    val sitesListEndpoint: ServerEndpoint[Unit, ErrorResponse, List[Site], Any, Future] =
-      endpoint
-        .get
-        .in("api" / "sites")
-        .errorOut(jsonBody[ErrorResponse])
-        .out(jsonBody[List[Site]])
-        .serverLogic(_ => getSites)
+  private[routes] val sitesListEndpoint: ServerEndpoint[Unit, ErrorResponse, List[Site], Any, Future] =
+    endpoint
+      .get
+      .in("api" / "sites")
+      .errorOut(jsonBody[ErrorResponse])
+      .out(jsonBody[List[Site]])
+      .serverLogic(_ => getSites)
 
-  }
-
-  def agentRoutes: Route = {
+  def routes: Route = {
 
     import akka.http.scaladsl.server.Directives._
 

@@ -44,8 +44,8 @@ object ApplicationMain extends ApplicationModule {
       val biddingAgentActor: ActorRef[Command] = context.spawn(biddingAgent.start, "BiddingAgentActor")
       context.watch(biddingAgentActor)
 
-      val routes = new BiddingAgentRoutes(biddingAgentActor, statisticsService, campaignsProvider)(context.system)
-      startHttpServer(routes.agentRoutes)(context.system)
+      val agentRoutes = new BiddingAgentRoutes(biddingAgentActor, statisticsService, campaignsProvider)(context.system)
+      startHttpServer(agentRoutes.routes)(context.system)
 
       Behaviors.empty
     }

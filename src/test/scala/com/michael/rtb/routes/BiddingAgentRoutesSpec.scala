@@ -1,4 +1,4 @@
-package com.michael.rtb
+package com.michael.rtb.routes
 
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.http.scaladsl.marshalling.Marshal
@@ -8,7 +8,6 @@ import com.michael.rtb.actors.{BidRequest, BidResponse, BiddingAgentActor}
 import com.michael.rtb.dao.StatisticsDao
 import com.michael.rtb.domain._
 import com.michael.rtb.repository.impl.DefaultCampaignsRepository
-import com.michael.rtb.routes.BiddingAgentRoutes
 import com.michael.rtb.services.impl.{DefaultAuctionService, DefaultStatisticsService, DefaultValidationService}
 import com.michael.rtb.utils.AppUtils._
 import com.typesafe.scalalogging.LazyLogging
@@ -51,7 +50,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
     testKit.system.classicSystem
 
   val agent = testKit.spawn(biddingAgent.start)
-  lazy val routes = new BiddingAgentRoutes(agent, statisticsService, campaignsStorage).agentRoutes
+  lazy val routes = new BiddingAgentRoutes(agent, statisticsService, campaignsStorage).routes
 
   "BiddingAgentRoutes" should {
 
@@ -81,7 +80,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
       val bidRequest = BidRequest(uuid, emptyImpressions, site, Some(user), Some(device))
       val bidRequestEntity: MessageEntity = Marshal(bidRequest).to[MessageEntity].futureValue
 
-      val request = Post("/api/v1/bid-request").withEntity(bidRequestEntity)
+      val request = Post("/api/bid-request").withEntity(bidRequestEntity)
 
       request ~> routes ~> check {
         status should ===(StatusCodes.NoContent)
@@ -124,7 +123,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
       val bidRequest = BidRequest(uuid, Some(impressions), Site(1, domain), emptyUser, emptyDevice)
       val bidRequestEntity: MessageEntity = Marshal(bidRequest).to[MessageEntity].futureValue
 
-      val request = Post("/api/v1/bid-request").withEntity(bidRequestEntity)
+      val request = Post("/api/bid-request").withEntity(bidRequestEntity)
 
       request ~> routes ~> check {
         status should ===(StatusCodes.NoContent)
@@ -168,7 +167,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
       val bidRequest = BidRequest(uuid, Some(impressions), site, Some(user), Some(device))
       val bidRequestEntity: MessageEntity = Marshal(bidRequest).to[MessageEntity].futureValue
 
-      val request = Post("/api/v1/bid-request").withEntity(bidRequestEntity)
+      val request = Post("/api/bid-request").withEntity(bidRequestEntity)
 
       request ~> routes ~> check {
         status should ===(StatusCodes.Created)
@@ -183,7 +182,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
 
     "be able to fetch all campaigns" in {
 
-      val request = Get("/api/v1/campaigns")
+      val request = Get("/api/campaigns")
 
       request ~> routes ~> check {
         status should ===(StatusCodes.OK)
@@ -201,7 +200,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
 
       when(statisticsService.getSites).thenReturn(Task.pure(List(site)))
 
-      val request = Get("/api/v1/sites")
+      val request = Get("/api/sites")
 
       request ~> routes ~> check {
         status should ===(StatusCodes.OK)
