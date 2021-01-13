@@ -34,17 +34,17 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
   private implicit val timeout: Timeout =
     Timeout.create(system.settings.config.getDuration("app.routes.ask-timeout"))
 
-  def getSites: Future[Either[ErrorResponse, List[Site]]] =
+  private[routes] def getSites: Future[Either[ErrorResponse, List[Site]]] =
     statisticsService.getSites.map(Right(_)).toFuture.recover {
       case NonFatal(e) =>
         logger.error(s"failed to fetch sites: [${e.getMessage}]", e)
         Left(ErrorResponse(e.getMessage))
     }
 
-  def getCampaigns: Future[Either[ErrorResponse, List[Campaign]]] =
+  private[routes] def getCampaigns: Future[Either[ErrorResponse, List[Campaign]]] =
     Future.successful(campaignsProvider.getCampaigns).map(Right(_))
 
-  def createBidRequest(bidRequest: BidRequest): Future[Either[ErrorResponse, BiddingAgentResponse]] =
+  private[routes] def createBidRequest(bidRequest: BidRequest): Future[Either[ErrorResponse, BiddingAgentResponse]] =
     biddingAgentActor.ask(BiddingAgentRequest(bidRequest, _)).map {
       case BidErrorResponse(msg) => Left(ErrorResponse(msg))
       case response => Right(response)
@@ -82,6 +82,7 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
       .out(jsonBody[List[Site]])
       .serverLogic(_ => getSites)
 
+  /** we can use cache to reduce the number of db calls */
   def routes: Route = {
 
     import akka.http.scaladsl.server.Directives._
