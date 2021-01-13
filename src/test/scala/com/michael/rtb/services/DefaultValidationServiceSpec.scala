@@ -109,7 +109,17 @@ class DefaultValidationServiceSpec extends AnyWordSpec with Matchers {
 
     }
 
-    "return true if campaign's site targeting contains segments' ids" in {
+    "return true if campaign's segment targeting is empty" in {
+
+      val campaign = Campaign(1, "USA", Targeting(Set(), Set()), List(Banner(1, "https://random.com/1", 1, 1)), 1.0)
+
+      val result = validationService.validateSegments(campaign, Set(1, 2))
+
+      result should be(true)
+
+    }
+
+    "return true if campaign's segment targeting contains segments' ids" in {
 
       val campaign = Campaign(1, "USA", Targeting(Set(), Set(1)), List(Banner(1, "https://random.com/1", 1, 1)), 1.0)
 

@@ -6,6 +6,7 @@ import com.michael.rtb.database.Database
 import com.michael.rtb.repository.impl.DefaultCampaignsRepository
 import com.michael.rtb.services.impl._
 
+/** compile-time DI module */
 trait ApplicationModule {
 
   import com.softwaremill.macwire._

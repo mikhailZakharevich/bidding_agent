@@ -54,7 +54,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
 
   "BiddingAgentRoutes" should {
 
-    "return empty body if `impressions` are empty (POST /api/v1/bid-request)" in {
+    "return empty body for bid request if `impressions` are empty" in {
 
       val domain = "https://random.com/1"
       val site = Site(1, domain)
@@ -87,7 +87,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
       }
     }
 
-    "return empty body if `user` and `device` data are empty (POST /api/v1/bid-request)" in {
+    "return empty body for bid request if `user` and `device` data are empty" in {
 
       val domain = "https://random.com/1"
       val site = Site(1, domain)
@@ -130,7 +130,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
       }
     }
 
-    "be able to create bids with impressions and at least user or device data present (POST /bid-request)" in {
+    "be able to create bids with impressions and at least user or device data present" in {
 
       val domain = "https://random.com/1"
       val site = Site(1, domain)

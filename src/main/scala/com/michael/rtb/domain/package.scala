@@ -4,6 +4,7 @@ package object domain {
 
   case class Campaign(id: Int, country: String, targeting: Targeting, banners: List[Banner], bid: Double)
 
+  // using Set for fast lookup
   case class Targeting(targetedSiteIds: Set[Int], targetedSegmentIds: Set[Int])
 
   case class Banner(id: Int, src: String, width: Int, height: Int)

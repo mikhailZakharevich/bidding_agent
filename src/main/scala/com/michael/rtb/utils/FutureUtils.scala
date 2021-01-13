@@ -6,6 +6,7 @@ import scala.concurrent.Future
 
 trait FutureUtils {
 
+  // helper method to convert monix Tasks into Futures (for interaction with akka)
   implicit class DbTaskToFuture[A](task: DbTask[A]) {
 
     import monix.execution.Scheduler.Implicits.global

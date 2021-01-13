@@ -4,6 +4,7 @@ import com.michael.rtb.domain._
 import com.michael.rtb.services.ValidationService
 import com.typesafe.scalalogging.LazyLogging
 
+/** This service is responsible for campaign targeting, leaving only those that match validation requirements */
 class DefaultValidationService extends ValidationService with LazyLogging {
 
   override def validateSegments(campaign: Campaign, segmentIds: Set[Int]): Boolean =
@@ -21,6 +22,8 @@ class DefaultValidationService extends ValidationService with LazyLogging {
   override def validateSite(campaign: Campaign, site: Site): Boolean =
     campaign.targeting.targetedSiteIds.isEmpty || campaign.targeting.targetedSiteIds.contains(site.id)
 
+  // at least one of w, wmin, wmax should be specified for width
+  // and at least one of h, hmin, hmax should be specified for height
   override def validateBanners(campaign: Campaign, impressions: List[Impression]): Boolean =
     impressions.flatMap {
       case Impression(_, _, _, Some(w), _, _, Some(h), _, _)                         => campaign.banners.filter(banner => banner.height == h && banner.width == w)

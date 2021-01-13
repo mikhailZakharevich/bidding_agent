@@ -8,6 +8,9 @@ import com.michael.rtb.errors.ApiError._
 import com.typesafe.scalalogging.LazyLogging
 import monix.eval.Task
 
+/** data access object for statistical data to be used by bidding agent and for creation of new
+ * schema definition can be found in resources/schema.sql
+ * */
 class StatisticsDao(db: MysqlDatabaseProvider) extends LazyLogging {
 
   def getSites: DbTask[List[Site]] = db.runT { implicit ctx =>
@@ -87,6 +90,7 @@ class StatisticsDao(db: MysqlDatabaseProvider) extends LazyLogging {
 
 }
 
+/** these case classes refer to db entities */
 object StatisticsDao {
 
   val ExchangeId: Int = 1

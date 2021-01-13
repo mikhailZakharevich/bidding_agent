@@ -9,6 +9,7 @@ trait MysqlDatabaseProvider extends DatabaseProvider[MySQLDialect, SnakeCase.typ
 
   val config: Config
 
+  // use a dedicated thread pool for db interaction
   lazy val ctx = new MysqlMonixJdbcContext(SnakeCase, config, Runner.using(Scheduler.io()))
 
 }

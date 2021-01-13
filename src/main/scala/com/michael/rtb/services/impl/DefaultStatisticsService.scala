@@ -6,6 +6,7 @@ import com.michael.rtb.errors.ApiError.NotFoundError
 import com.michael.rtb.services.StatisticsService
 import monix.eval.Task
 
+/** service layer to interact with data access objects */
 class DefaultStatisticsService(statisticsDao: StatisticsDao) extends StatisticsService {
 
   override def getSites: Task[List[Site]] = statisticsDao.getSites

@@ -2,7 +2,6 @@ package com.michael.rtb.actors
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
-import cats.implicits._
 import com.michael.rtb.ApplicationMain.auctionService.Price
 import com.michael.rtb.actors.BiddingAgentActor._
 import com.michael.rtb.domain._
@@ -10,7 +9,6 @@ import com.michael.rtb.repository.CampaignsRepository
 import com.michael.rtb.services.{AuctionService, StatisticsService, ValidationService}
 import com.michael.rtb.utils.AppUtils._
 import com.typesafe.scalalogging.LazyLogging
-import monix.eval._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -19,8 +17,11 @@ import scala.util.{Failure, Success}
 case class BidRequest(id: String, imp: Option[List[Impression]], site: Site, user: Option[User], device: Option[Device])
 
 sealed trait BiddingAgentResponse
+
 case class BidResponse(id: String, bidRequestId: String, price: Double, adId: Option[String], banner: Option[Banner]) extends BiddingAgentResponse
+
 case class BidErrorResponse(message: String) extends BiddingAgentResponse
+
 case object BidEmptyResponse extends BiddingAgentResponse
 
 class BiddingAgentActor(statisticsService: StatisticsService, campaignsStorage: CampaignsRepository, auctionService: AuctionService, validationService: ValidationService) extends LazyLogging {
@@ -55,9 +56,7 @@ class BiddingAgentActor(statisticsService: StatisticsService, campaignsStorage: 
           context.log.error(s"bidding failed: ${err.getMessage}", err)
           replyTo ! BidErrorResponse(err.getMessage)
           Behaviors.same
-
-      }
-      }
+      }}
     }.onFailure(onFailureStrategy)
 
   private[actors] def createBid(br: BidRequest, tags: List[String]): Future[Option[(Campaign, Price)]] =
@@ -81,8 +80,11 @@ object BiddingAgentActor {
   sealed trait Command
 
   case class BiddingAgentRequest(bidRequest: BidRequest, replyTo: ActorRef[BiddingAgentResponse]) extends Command
+
   case class NonEmptyBidResponse(bidResponse: BidResponse, replyTo: ActorRef[BiddingAgentResponse]) extends Command
+
   case class EmptyBidResponse(bidRequest: BidRequest, replyTo: ActorRef[BiddingAgentResponse]) extends Command
+
   case class ErrorBidResponse(error: Throwable, replyTo: ActorRef[BiddingAgentResponse]) extends Command
 
 }
