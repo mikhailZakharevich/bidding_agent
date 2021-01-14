@@ -20,6 +20,8 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar.mock
+import akka.http.scaladsl.model.headers.`Cache-Control`
+import akka.http.scaladsl.model.headers.CacheDirectives.`no-cache`
 
 class BiddingAgentRoutesSpec extends AnyWordSpec
   with Matchers
@@ -80,7 +82,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
       val bidRequest = BidRequest(uuid, emptyImpressions, site, Some(user), Some(device))
       val bidRequestEntity: MessageEntity = Marshal(bidRequest).to[MessageEntity].futureValue
 
-      val request = Post("/api/bid-request").withEntity(bidRequestEntity)
+      val request = Post("/api/bid-request").withEntity(bidRequestEntity) ~> `Cache-Control`(`no-cache`)
 
       request ~> routes ~> check {
         status should ===(StatusCodes.NoContent)
@@ -123,7 +125,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
       val bidRequest = BidRequest(uuid, Some(impressions), Site(1, domain), emptyUser, emptyDevice)
       val bidRequestEntity: MessageEntity = Marshal(bidRequest).to[MessageEntity].futureValue
 
-      val request = Post("/api/bid-request").withEntity(bidRequestEntity)
+      val request = Post("/api/bid-request").withEntity(bidRequestEntity) ~> `Cache-Control`(`no-cache`)
 
       request ~> routes ~> check {
         status should ===(StatusCodes.NoContent)
@@ -167,7 +169,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
       val bidRequest = BidRequest(uuid, Some(impressions), site, Some(user), Some(device))
       val bidRequestEntity: MessageEntity = Marshal(bidRequest).to[MessageEntity].futureValue
 
-      val request = Post("/api/bid-request").withEntity(bidRequestEntity)
+      val request = Post("/api/bid-request").withEntity(bidRequestEntity) ~> `Cache-Control`(`no-cache`)
 
       request ~> routes ~> check {
         status should ===(StatusCodes.Created)
