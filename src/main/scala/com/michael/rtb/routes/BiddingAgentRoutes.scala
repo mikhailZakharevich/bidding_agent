@@ -44,6 +44,7 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
   private[routes] def getCampaigns: Future[Either[ErrorResponse, List[Campaign]]] =
     Future.successful(campaignsProvider.getCampaigns).map(Right(_))
 
+  /** may also use askWithStatus for result wrapping  */
   private[routes] def createBidRequest(bidRequest: BidRequest): Future[Either[ErrorResponse, BiddingAgentResponse]] =
     biddingAgentActor.ask(BiddingAgentRequest(bidRequest, _)).map {
       case BidErrorResponse(msg) => Left(ErrorResponse(msg))

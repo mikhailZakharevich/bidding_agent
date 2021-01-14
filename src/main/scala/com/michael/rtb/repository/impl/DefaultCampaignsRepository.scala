@@ -3,7 +3,9 @@ package com.michael.rtb.repository.impl
 import com.michael.rtb.domain.{Banner, Campaign, Targeting}
 import com.michael.rtb.repository.CampaignsRepository
 
-/** list of hard-coded campaigns */
+/** list of hard-coded campaigns
+ *  This may also be a stateful actor storing campaigns
+ * */
 class DefaultCampaignsRepository extends CampaignsRepository {
 
   override def getCampaigns = List(
