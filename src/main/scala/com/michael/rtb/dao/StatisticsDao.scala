@@ -57,7 +57,7 @@ class StatisticsDao(db: MysqlDatabaseProvider) extends LazyLogging {
         _.domain -> lift(site.domain),
         _.exchangeSiteId -> lift(site.id),
         _.exchangeId -> lift(ExchangeId)
-      ).onConflictIgnore.returningGenerated(_.id)))
+      ).returningGenerated(_.id)))
   }
 
   def insertPlacements(siteId: Int, tags: List[String]): DbTask[List[Int]] = db.runT { implicit ctx =>
@@ -68,7 +68,7 @@ class StatisticsDao(db: MysqlDatabaseProvider) extends LazyLogging {
           .insert(
             _.siteId -> lift(siteId),
             _.tagId -> tag
-          ).onConflictIgnore.returningGenerated(_.id)
+          ).returningGenerated(_.id)
         )
       )
     )
@@ -82,7 +82,7 @@ class StatisticsDao(db: MysqlDatabaseProvider) extends LazyLogging {
           .insert(
             _.siteId -> lift(siteId),
             _.placementId -> plcId
-          ).onConflictIgnore.returningGenerated(_.id)
+          ).returningGenerated(_.id)
         )
       )
     )

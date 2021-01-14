@@ -22,8 +22,10 @@
     <orderEntry type="library" name="sbt: com.beachape:enumeratum-macros_2.13:1.6.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.beachape:enumeratum_2.13:1.6.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.chuusai:shapeless_2.13:2.3.3:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.github.ben-manes.caffeine:caffeine:2.8.6:jar" level="project" />
     <orderEntry type="library" name="sbt: com.github.vertical-blank:scala-sql-formatter_2.13:1.0.0:jar" level="project" />
     <orderEntry type="library" name="sbt: com.github.vertical-blank:sql-formatter:1.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.google.errorprone:error_prone_annotations:2.4.0:jar" level="project" />
     <orderEntry type="library" name="sbt: com.google.protobuf:protobuf-java:3.6.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:fansi_2.13:0.2.7:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:pprint_2.13:0.5.5:jar" level="project" />
@@ -54,6 +56,7 @@
     <orderEntry type="library" scope="TEST" name="sbt: com.typesafe.akka:akka-actor-testkit-typed_2.13:2.6.10:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.akka:akka-actor-typed_2.13:2.6.10:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.akka:akka-actor_2.13:2.6.10:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.typesafe.akka:akka-http-caching_2.13:10.2.2:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.akka:akka-http-core_2.13:10.2.2:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.akka:akka-http-spray-json_2.13:10.2.2:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="sbt: com.typesafe.akka:akka-http-testkit_2.13:10.2.2:jar" level="project" />
@@ -99,6 +102,7 @@
     <orderEntry type="library" scope="TEST" name="sbt: net.bytebuddy:byte-buddy:1.10.13:jar" level="project" />
     <orderEntry type="library" name="sbt: org.asynchttpclient:async-http-client-netty-utils:2.12.1:jar" level="project" />
     <orderEntry type="library" name="sbt: org.asynchttpclient:async-http-client:2.12.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.checkerframework:checker-qual:3.7.0:jar" level="project" />
     <orderEntry type="library" name="sbt: org.jctools:jctools-core:2.1.2:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="sbt: org.mockito:mockito-core:3.4.6:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="sbt: org.objenesis:objenesis:2.6:jar" level="project" />

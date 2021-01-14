@@ -2,7 +2,11 @@ package com.michael.rtb.routes
 
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.{ActorRef, ActorSystem}
-import akka.http.scaladsl.server.Route
+import akka.http.caching.LfuCache
+import akka.http.caching.scaladsl.{Cache, CachingSettings}
+import akka.http.scaladsl.model.HttpMethods
+import akka.http.scaladsl.server.directives.CachingDirectives._
+import akka.http.scaladsl.server.{RequestContext, Route, RouteResult}
 import akka.util.Timeout
 import com.michael.rtb.actors.BiddingAgentActor._
 import com.michael.rtb.actors._
@@ -20,6 +24,7 @@ import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
 case class ErrorResponse(message: String)
@@ -29,10 +34,28 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
                          campaignsProvider: CampaignsRepository)
                         (implicit val system: ActorSystem[_]) extends LazyLogging {
 
+  import BiddingAgentRoutes._
+
   private implicit val ex = system.executionContext
+
+  private val config = system.settings.config
 
   private implicit val timeout: Timeout =
     Timeout.create(system.settings.config.getDuration("app.routes.ask-timeout"))
+
+  private[routes] val defaultCachingSettings = CachingSettings(system)
+
+  private[routes] val lfuCacheSettings =
+    defaultCachingSettings.lfuCacheSettings
+      .withInitialCapacity(config.getInt("cache.init-capacity"))
+      .withMaxCapacity(config.getInt("cache.max-capacity"))
+      .withTimeToLive(config.getLong("cache.ttl").seconds)
+      .withTimeToIdle(config.getLong("cache.tti").seconds)
+
+  private[routes] val cachingSettings =
+    defaultCachingSettings.withLfuCacheSettings(lfuCacheSettings)
+
+  private[routes] val lfuCache: Cache[String, RouteResult] = LfuCache(cachingSettings)
 
   private[routes] def getSites: Future[Either[ErrorResponse, List[Site]]] =
     statisticsService.getSites.map(Right(_)).toFuture.recover {
@@ -44,7 +67,6 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
   private[routes] def getCampaigns: Future[Either[ErrorResponse, List[Campaign]]] =
     Future.successful(campaignsProvider.getCampaigns).map(Right(_))
 
-  /** may also use askWithStatus for result wrapping  */
   private[routes] def createBidRequest(bidRequest: BidRequest): Future[Either[ErrorResponse, BiddingAgentResponse]] =
     biddingAgentActor.ask(BiddingAgentRequest(bidRequest, _)).map {
       case BidErrorResponse(msg) => Left(ErrorResponse(msg))
@@ -83,13 +105,13 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
       .out(jsonBody[List[Site]])
       .serverLogic(_ => getSites)
 
-  /** we can use cache to reduce the number of db calls */
   def routes: Route = {
-
     import akka.http.scaladsl.server.Directives._
 
     concat(
-      AkkaHttpServerInterpreter.toRoute(createBidRequestEndpoint),
+      AkkaHttpServerInterpreter.toDirective(createBidRequestEndpoint).tapply {
+        case (bidRequest, completion) => cache(lfuCache, bidderCacheKeyer(bidRequest))(completion(createBidRequest(bidRequest)))
+      },
       AkkaHttpServerInterpreter.toRoute(campaignsListEndpoint),
       AkkaHttpServerInterpreter.toRoute(sitesListEndpoint)
     )
@@ -97,4 +119,11 @@ class BiddingAgentRoutes(biddingAgentActor: ActorRef[BiddingAgentActor.Command],
 
 }
 
+object BiddingAgentRoutes {
 
+  private[routes] def bidderCacheKeyer(bidRequest: BidRequest): PartialFunction[RequestContext, String] = {
+    case r: RequestContext if r.request.method == HttpMethods.POST =>
+      s"${bidRequest.site.id}_${bidRequest.site.domain}"
+  }
+
+}
