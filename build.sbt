@@ -18,6 +18,7 @@ lazy val root = (project in file(".")).
       "com.typesafe.akka" %% "akka-stream"              % akkaVersion,
       "ch.qos.logback"    % "logback-classic"           % "1.2.3",
       "de.heikoseeberger" %% "akka-http-circe"          % "1.31.0",
+      "com.github.blemale" %% "scaffeine"               % "4.0.2"   % "compile",
 
       "io.circe" %% "circe-generic" % circeVersion,
       "io.circe" %% "circe-parser"  % circeVersion,

@@ -22,6 +22,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar.mock
 import akka.http.scaladsl.model.headers.`Cache-Control`
 import akka.http.scaladsl.model.headers.CacheDirectives.`no-cache`
+import com.michael.rtb.services.AuctionService.AuctionResult
 
 class BiddingAgentRoutesSpec extends AnyWordSpec
   with Matchers
@@ -77,7 +78,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
         any[Option[Device]],
         any[List[Campaign]]
       )).thenReturn(List.empty[Campaign]) // validation failed
-      when(auctionService.startAuction(any[List[Campaign]])).thenReturn(None)
+      when(auctionService.findWinnerCampaign(any[List[Campaign]])).thenReturn(None)
 
       val bidRequest = BidRequest(uuid, emptyImpressions, site, Some(user), Some(device))
       val bidRequestEntity: MessageEntity = Marshal(bidRequest).to[MessageEntity].futureValue
@@ -120,7 +121,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
         any[Option[Device]],
         any[List[Campaign]]
       )).thenReturn(List.empty[Campaign]) // validation failed
-      when(auctionService.startAuction(any[List[Campaign]])).thenReturn(None)
+      when(auctionService.findWinnerCampaign(any[List[Campaign]])).thenReturn(None)
 
       val bidRequest = BidRequest(uuid, Some(impressions), Site(1, domain), emptyUser, emptyDevice)
       val bidRequestEntity: MessageEntity = Marshal(bidRequest).to[MessageEntity].futureValue
@@ -164,7 +165,7 @@ class BiddingAgentRoutesSpec extends AnyWordSpec
         any[Option[Device]],
         any[List[Campaign]]
       )).thenReturn(List(cmp))
-      when(auctionService.startAuction(any[List[Campaign]])).thenReturn(Some((cmp, 1.0)))
+      when(auctionService.findWinnerCampaign(any[List[Campaign]])).thenReturn(Some(AuctionResult(cmp, 1.0)))
 
       val bidRequest = BidRequest(uuid, Some(impressions), site, Some(user), Some(device))
       val bidRequestEntity: MessageEntity = Marshal(bidRequest).to[MessageEntity].futureValue

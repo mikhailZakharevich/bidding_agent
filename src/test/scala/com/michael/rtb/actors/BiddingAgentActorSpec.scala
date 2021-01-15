@@ -5,6 +5,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import com.michael.rtb.domain._
 import com.michael.rtb.repository.CampaignsRepository
 import com.michael.rtb.repository.impl.DefaultCampaignsRepository
+import com.michael.rtb.services.AuctionService.AuctionResult
 import com.michael.rtb.services.impl.{DefaultAuctionService, DefaultStatisticsService, DefaultValidationService}
 import com.michael.rtb.services.{AuctionService, StatisticsService, ValidationService}
 import com.michael.rtb.utils.AppUtils._
@@ -75,7 +76,7 @@ class BiddingAgentActorSpec extends AnyWordSpec
         any[Option[Device]],
         any[List[Campaign]]
       )).thenReturn(List(cmp))
-      when(auctionService.startAuction(any[List[Campaign]])).thenReturn(Some((cmp, 1.0)))
+      when(auctionService.findWinnerCampaign(any[List[Campaign]])).thenReturn(Some(AuctionResult(cmp, 1.0)))
 
       val expectedBehavior = Behaviors.receiveMessage[BiddingAgentActor.BiddingAgentRequest] { msg =>
         msg.replyTo ! BidResponse(uuid, bidRequest.id, 1.0, Some(cmp.id.toString), Some(banner))
@@ -86,7 +87,7 @@ class BiddingAgentActorSpec extends AnyWordSpec
       val responseProbe = testKit.createTestProbe[BiddingAgentResponse]()
       val agent = testKit.spawn(Behaviors.monitor(probe.ref, expectedBehavior))
 
-      biddingAgent.createBid(bidRequest, List(imp.tagId)).futureValue should be(Some((cmp, 1.0)))
+      biddingAgent.createBid(bidRequest, List(imp.tagId)).futureValue should be(Some(AuctionResult(cmp, 1.0)))
 
       agent ! BiddingAgentActor.BiddingAgentRequest(bidRequest, responseProbe.ref)
 
@@ -131,7 +132,7 @@ class BiddingAgentActorSpec extends AnyWordSpec
         any[Option[Device]],
         any[List[Campaign]]
       )).thenReturn(List(cmp))
-      when(auctionService.startAuction(any[List[Campaign]])).thenReturn(None)
+      when(auctionService.findWinnerCampaign(any[List[Campaign]])).thenReturn(None)
 
       val expectedBehavior = Behaviors.receiveMessage[BiddingAgentActor.BiddingAgentRequest] { msg =>
         msg.replyTo ! BidEmptyResponse
@@ -188,7 +189,7 @@ class BiddingAgentActorSpec extends AnyWordSpec
         any[Option[Device]],
         any[List[Campaign]]
       )).thenReturn(List(cmp))
-      when(auctionService.startAuction(any[List[Campaign]])).thenThrow(error)
+      when(auctionService.findWinnerCampaign(any[List[Campaign]])).thenThrow(error)
 
       val expectedBehavior = Behaviors.receiveMessage[BiddingAgentActor.BiddingAgentRequest] { msg =>
         msg.replyTo ! BidErrorResponse(error.getMessage)
