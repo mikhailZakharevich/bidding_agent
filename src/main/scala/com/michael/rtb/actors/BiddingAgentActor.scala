@@ -17,17 +17,28 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
-case class BidRequest(id: String, imp: Option[List[Impression]], site: Site, user: Option[User], device: Option[Device])
+case class BidRequest(id: String,
+                      imp: Option[List[Impression]],
+                      site: Site,
+                      user: Option[User],
+                      device: Option[Device])
 
 sealed trait BiddingAgentResponse
 
-case class BidResponse(id: String, bidRequestId: String, price: Double, adId: Option[String], banner: Option[Banner]) extends BiddingAgentResponse
+case class BidResponse(id: String,
+                       bidRequestId: String,
+                       price: Double,
+                       adId: Option[String],
+                       banner: Option[Banner]) extends BiddingAgentResponse
 
 case class BidErrorResponse(message: String) extends BiddingAgentResponse
 
 case object BidEmptyResponse extends BiddingAgentResponse
 
-class BiddingAgentActor(statisticsService: StatisticsService, campaignsStorage: CampaignsRepository, auctionService: AuctionService, validationService: ValidationService) extends LazyLogging {
+class BiddingAgentActor(statisticsService: StatisticsService,
+                        campaignsStorage: CampaignsRepository,
+                        auctionService: AuctionService,
+                        validationService: ValidationService) extends LazyLogging {
 
   private val conf: Config = ConfigFactory.load()
 
@@ -48,7 +59,11 @@ class BiddingAgentActor(statisticsService: StatisticsService, campaignsStorage: 
           val tags = br.imp.getOrElse(Nil).map(_.tagId)
 
           context.pipeToSelf(createBid(br, tags)) {
-            case Success(Some(AuctionResult(campaign, price))) => NonEmptyBidResponse(BidResponse(uuid, br.id, price, Some(campaign.id.toString), campaign.banners.headOption), replyTo)
+            case Success(Some(AuctionResult(campaign, price))) =>
+              NonEmptyBidResponse(
+                BidResponse(uuid, br.id, price, Some(campaign.id.toString), campaign.banners.headOption),
+                replyTo
+              )
             case Success(None) => EmptyBidResponse(br, replyTo)
             case Failure(err) => ErrorBidResponse(err, replyTo)
           }
@@ -78,7 +93,8 @@ class BiddingAgentActor(statisticsService: StatisticsService, campaignsStorage: 
 
       (site, segmentIds) = siteAndSegments
 
-      campaigns = validationService.getMatchingCampaigns(site, br.imp, segmentIds, br.user, br.device, campaignsStorage.getCampaigns)
+      campaigns = validationService
+        .getMatchingCampaigns(site, br.imp, segmentIds, br.user, br.device, campaignsStorage.getCampaigns)
       _ = logger.debug(s"agent -> campaigns found [${campaigns.mkString(",")}]")
 
       result = auctionService.findWinnerCampaign(campaigns)

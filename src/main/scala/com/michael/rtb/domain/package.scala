@@ -10,7 +10,15 @@ package object domain {
   case class Banner(id: Int, src: String, width: Int, height: Int)
 
 
-  case class Impression(id: String, wMin: Option[Int], wMax: Option[Int], w: Option[Int], hMin: Option[Int], hMax: Option[Int], h: Option[Int], bidFloor: Option[Double], tagId: String)
+  case class Impression(id: String,
+                        wMin: Option[Int],
+                        wMax: Option[Int],
+                        w: Option[Int],
+                        hMin: Option[Int],
+                        hMax: Option[Int],
+                        h: Option[Int],
+                        bidFloor: Option[Double],
+                        tagId: String)
 
   case class Site(id: Int, domain: String)
 

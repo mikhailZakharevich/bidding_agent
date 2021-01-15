@@ -30,12 +30,20 @@ class DefaultValidationService extends ValidationService with LazyLogging {
     impressions.flatMap {
       case Impression(_, _, _, Some(w), _, _, Some(h), _, _) =>
         campaign.banners.filter(banner => banner.height == h && banner.width == w)
+
       case Impression(_, Some(wmin), Some(wmax), _, Some(hmin), Some(hmax), _, _, _) =>
-        campaign.banners.filter(banner => banner.height <= hmax && banner.width <= wmax && banner.height >= hmin && banner.width >= wmin)
+        campaign.banners.filter(
+          banner => banner.height <= hmax &&
+          banner.width <= wmax &&
+          banner.height >= hmin &&
+          banner.width >= wmin)
+
       case Impression(_, Some(wmin), _, _, Some(hmin), _, _, _, _) =>
         campaign.banners.filter(banner => banner.height >= hmin && banner.width >= wmin)
+
       case Impression(_, _, Some(wmax), _, _, Some(hmax), _, _, _) =>
         campaign.banners.filter(banner => banner.height <= hmax && banner.width <= wmax)
+
       case _ =>
         Nil
     }.nonEmpty

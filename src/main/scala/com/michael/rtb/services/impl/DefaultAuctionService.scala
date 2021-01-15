@@ -10,6 +10,8 @@ class DefaultAuctionService extends AuctionService {
 
   /** start auction for eligible campaigns */
   override def findWinnerCampaign(campaigns: List[Campaign]): Option[AuctionResult] =
-    campaigns.sortWith(_.bid > _.bid).headOption.map(c => AuctionResult(c, c.bid * WinningCoefficient))
+    campaigns
+      .sortWith(_.bid > _.bid).headOption
+      .map(c => AuctionResult(c, c.bid * WinningCoefficient))
 
 }
